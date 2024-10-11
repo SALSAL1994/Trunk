@@ -25,7 +25,7 @@ app.use(
 );
 
 // simple route
-app.get("/", (req, res) => {
+app.post("/", (req, res) => {
   res.json({ message: "trunk." });
 });
 
