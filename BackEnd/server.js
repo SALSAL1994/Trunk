@@ -3,7 +3,8 @@ const cors = require("cors");
 const cookieSession = require("cookie-session");
 const mongoose = require("mongoose"); // Add mongoose
 const authRoutes = require('./routes/auth.routes');
-
+const User = require('./models/users.model'); // Import User model
+const bcrypt = require("bcrypt"); // Import bcrypt
 
 require('dotenv').config(); // Load environment variables
 
@@ -44,8 +45,41 @@ app.use(
 app.use('/api/auth', authRoutes);
 
 // Simple route
-app.post("/", (req, res) => {
-  res.json({ message: "trunk." });
+app.post("/register", async (req, res) => {
+  const { username, email, password, roles } = req.body;
+
+  try {
+    // Validate input
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists." });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      roles: roles || [], // Assign roles if provided
+    });
+
+    // Save the user to the database
+    await newUser.save();
+
+    // Respond with success
+    res.status(201).json({ message: "User registered successfully." });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
 });
 
 // Set port, listen for requests
