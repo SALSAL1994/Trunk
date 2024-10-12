@@ -82,6 +82,11 @@ app.post("/register", async (req, res) => {
   }
 });
 
+
+app.post("/signout", (req, res) => {
+  req.session = null; // Clear the session
+  res.status(200).json({ message: "You've been signed out!" });
+});
 // Set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

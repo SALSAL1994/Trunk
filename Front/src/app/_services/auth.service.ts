@@ -16,7 +16,7 @@ export class AuthService {
 
   login(username: string, password: string): Observable<any> {
     return this.http.post(
-      AUTH_API + 'signin',
+      AUTH_API + 'api/auth/signin',
       {
         username,
         password,
@@ -39,6 +39,23 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+
+    localStorage.removeItem('authToken');
     return this.http.post(AUTH_API + 'signout', { }, httpOptions);
+  }
+
+
+  saveToken(token: string): void {
+    localStorage.setItem('authToken', token);
+  }
+
+
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('authToken');
+  }
+
+
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
   }
 }
