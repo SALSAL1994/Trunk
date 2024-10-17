@@ -9,6 +9,8 @@ import { BoardUserComponent } from './board-user/board-user.component';
 import { BoardModeratorComponent } from './board-moderator/board-moderator.component';
 import { BoardAdminComponent } from './board-admin/board-admin.component';
 import { AuthGuard } from './auth.guard'; // Import AuthGuard
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { RequestComponent } from './request/request.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] }, // Protect route
@@ -18,6 +20,8 @@ const routes: Routes = [
   { path: 'user', component: BoardUserComponent, canActivate: [AuthGuard] }, // Protect route
   { path: 'mod', component: BoardModeratorComponent, canActivate: [AuthGuard] }, // Protect route
   { path: 'admin', component: BoardAdminComponent, canActivate: [AuthGuard] }, // Protect route
+  { path: 'sidebar', component: SidebarComponent, canActivate: [AuthGuard] },
+  { path: 'request', component: RequestComponent, canActivate: [AuthGuard] }, // Protect route
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

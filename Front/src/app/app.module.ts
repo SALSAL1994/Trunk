@@ -17,6 +17,7 @@ import { httpInterceptorProviders } from './_helpers/http.interceptor';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { FooterComponent } from './footer/footer.component';
+import { RequestComponent } from './request/request.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { FooterComponent } from './footer/footer.component';
     BoardUserComponent,
     HeaderComponent,
     SidebarComponent,
-    FooterComponent
+    FooterComponent,
+    RequestComponent
   ],
   imports: [
     BrowserModule,
