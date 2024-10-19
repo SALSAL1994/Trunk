@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Loader } from '@googlemaps/js-api-loader'; // Google Maps API Loader
+import { Loader } from '@googlemaps/js-api-loader';
 import { config } from '../../../../Front/config';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -36,7 +36,7 @@ export class RequestComponent implements OnInit {
   destinationMarker: google.maps.Marker | undefined;
   directionsService!: google.maps.DirectionsService;
   directionsRenderer!: google.maps.DirectionsRenderer;
-  geocoder!: google.maps.Geocoder; // Geocoder for address lookup
+  geocoder!: google.maps.Geocoder;
 
   newRequest: NewRequest = {
     name: '',
@@ -50,10 +50,10 @@ export class RequestComponent implements OnInit {
     senderLng:0,
     recipientLat: 0,
     recipientLng: 0,
-    productImage: null // Initialize as null
+    productImage: null
   };
 
-  // New properties for distance and cost
+
   routeDistance: string = ''; // Distance in kilometers
   routeCost: string = '';     // Cost in euros
 
@@ -64,7 +64,7 @@ export class RequestComponent implements OnInit {
 
   ngOnInit() {
     const loader = new Loader({
-      apiKey: config.googleMapsApiKey,  // Replace with your actual API key
+      apiKey: config.googleMapsApiKey,
       version: 'weekly',
       libraries: ['places']
     });
@@ -80,7 +80,7 @@ export class RequestComponent implements OnInit {
       console.error("Error loading Google Maps API", err);
     });
 
-    // Subscribe to the address input changes with a debounce
+ 
     this.originAddressSubject.pipe(debounceTime(300)).subscribe(address => {
       this.geocodeAddress(address, 'origin');
     });
@@ -243,13 +243,13 @@ export class RequestComponent implements OnInit {
 
 
 resetFormAndMap() {
-  // Reset form fields
+
   this.newRequest = {
     name: '',
     senderAddress: '',
     recipientAddress: '',
     productType: '',
-    requestDate: '', // Adjust this if requestDate is supposed to be a Date
+    requestDate: '',
     requestTime: '',
     productSize: '',
     recipientLat: 0,
@@ -259,34 +259,33 @@ resetFormAndMap() {
     productImage: null
   };
 
-  // Reset distance and cost fields
-  this.routeDistance = ''; // Ensure routeDistance is of the expected type
-  this.routeCost = ''; // Ensure routeCost is of the expected type
 
-  // Remove markers from the map
+  this.routeDistance = '';
+  this.routeCost = '';
+
+
   if (this.originMarker) {
-    this.originMarker.setMap(null); // Remove the origin marker from the map
-    this.originMarker = undefined; // Clear the reference
+    this.originMarker.setMap(null);
+    this.originMarker = undefined;
   }
 
   if (this.destinationMarker) {
-    this.destinationMarker.setMap(null); // Remove the destination marker from the map
-    this.destinationMarker = undefined; // Clear the reference
-  }
+    this.destinationMarker.setMap(null);
+    this.destinationMarker = undefined;
 
-  // Clear directions from the map
+
   if (this.directionsRenderer) {
-    this.directionsRenderer.setMap(null); // Ensure directionsRenderer exists before calling
+    this.directionsRenderer.setMap(null);
   }
-}
+}}
 
 
-  // Called when the address is typed in manually for origin
+
   onOriginAddressChange() {
     this.originAddressSubject.next(this.newRequest.senderAddress);
   }
 
-  // Called when the address is typed in manually for destination
+
   onDestinationAddressChange() {
     this.destinationAddressSubject.next(this.newRequest.recipientAddress);
   }
@@ -294,7 +293,7 @@ resetFormAndMap() {
   onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      this.newRequest.productImage = file; // Store the file directly
+      this.newRequest.productImage = file;
     }
   }
 
