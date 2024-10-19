@@ -1,16 +1,25 @@
-import { Component } from '@angular/core';
-import * as L from 'leaflet';
-import 'leaflet-routing-machine';  // Import Leaflet Routing Machine
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Loader } from '@googlemaps/js-api-loader'; // Google Maps API Loader
+import { config } from '../../../../Front/config';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { AuthService } from '../_services/auth.service';
+import { FormsModule } from '@angular/forms';
 
-// Define the interface for a request
-interface Request {
+
+interface NewRequest {
   name: string;
   senderAddress: string;
+  senderLat: number;
+  senderLng: number;
   recipientAddress: string;
+  recipientLat: number;
+  recipientLng: number;
   productType: string;
-  requestDate: string;  // Store date as string for simplicity
-  requestTime: string;  // Store time as string for simplicity
-  productImage?: string; // Store base64 image string
+  requestDate: string;
+  requestTime: string;
+  productSize: string;
+  productImage: File | null;
 }
 
 @Component({
@@ -18,92 +27,275 @@ interface Request {
   templateUrl: './request.component.html',
   styleUrls: ['./request.component.css']
 })
-export class RequestComponent {
-  // Array to hold submitted requests
-  requests: Request[] = [];
+export class RequestComponent implements OnInit {
+  @ViewChild('map', { static: false }) mapElementRef!: ElementRef;
 
-  map!: L.Map;
-  routingControl: any;
-  newRequest: Request = {
+  requests: Request[] = [];
+  map!: google.maps.Map;
+  originMarker: google.maps.Marker | undefined;
+  destinationMarker: google.maps.Marker | undefined;
+  directionsService!: google.maps.DirectionsService;
+  directionsRenderer!: google.maps.DirectionsRenderer;
+  geocoder!: google.maps.Geocoder; // Geocoder for address lookup
+
+  newRequest: NewRequest = {
     name: '',
     senderAddress: '',
     recipientAddress: '',
     productType: '',
     requestDate: '',
-    requestTime: ''
+    requestTime: '',
+    productSize: '',
+    senderLat:0,
+    senderLng:0,
+    recipientLat: 0,
+    recipientLng: 0,
+    productImage: null // Initialize as null
   };
 
+  // New properties for distance and cost
+  routeDistance: string = ''; // Distance in kilometers
+  routeCost: string = '';     // Cost in euros
+
+  private originAddressSubject = new Subject<string>();
+  private destinationAddressSubject = new Subject<string>();
+
+  constructor(private authService: AuthService, private formModule:FormsModule) { }
+
   ngOnInit() {
-    // Initialize map
-    this.map = L.map('map').setView([41.9028, 12.4964], 12); // Default to London
+    const loader = new Loader({
+      apiKey: config.googleMapsApiKey,  // Replace with your actual API key
+      version: 'weekly',
+      libraries: ['places']
+    });
 
-    // Set up tiles (Mapbox, OpenStreetMap, etc.)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(this.map);
+    // Load the Google Maps API
+    loader.load().then(() => {
+      this.initializeMap();
+      this.directionsService = new google.maps.DirectionsService(); // Initialize inside loader
+      this.directionsRenderer = new google.maps.DirectionsRenderer(); // Initialize inside loader
+      this.directionsRenderer.setMap(this.map); // Attach the renderer to the map
+      this.geocoder = new google.maps.Geocoder(); // Initialize the geocoder
+    }).catch(err => {
+      console.error("Error loading Google Maps API", err);
+    });
+
+    // Subscribe to the address input changes with a debounce
+    this.originAddressSubject.pipe(debounceTime(300)).subscribe(address => {
+      this.geocodeAddress(address, 'origin');
+    });
+
+    this.destinationAddressSubject.pipe(debounceTime(300)).subscribe(address => {
+      this.geocodeAddress(address, 'destination');
+    });
   }
 
-  plotRoute(originCoords: [number, number], destinationCoords: [number, number]) {
-    // Remove any existing route
-    if (this.routingControl) {
-      this.map.removeControl(this.routingControl);
+  initializeMap() {
+    const mapOptions: google.maps.MapOptions = {
+      center: { lat: 41.9028, lng: 12.4964 }, // Rome
+      zoom: 12,
+    };
+
+    this.map = new google.maps.Map(this.mapElementRef.nativeElement, mapOptions);
+
+    let clickCount = 0;
+    this.map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      this.reverseGeocode(e.latLng!, clickCount === 0 ? 'origin' : 'destination');
+      if (clickCount === 0) {
+        this.setMarker(e.latLng, 'origin');
+        clickCount++;
+      } else {
+        this.setMarker(e.latLng, 'destination');
+        this.calculateAndDisplayRoute(); // Calculate and show the route
+        clickCount = 0;
+      }
+    });
+  }
+
+  setMarker(position: google.maps.LatLng | null, type: 'origin' | 'destination') {
+    if (!position) return;
+
+    if (type === 'origin') {
+      if (this.originMarker) {
+        this.originMarker.setPosition(position);
+      } else {
+        this.originMarker = new google.maps.Marker({
+          position,
+          map: this.map,
+          label: 'O',
+        });
+      }
+      this.reverseGeocode(position, 'origin'); // Get address for origin and update input field
+    } else if (type === 'destination') {
+      if (this.destinationMarker) {
+        this.destinationMarker.setPosition(position);
+      } else {
+        this.destinationMarker = new google.maps.Marker({
+          position,
+          map: this.map,
+          label: 'D',
+        });
+      }
+      this.reverseGeocode(position, 'destination'); // Get address for destination and update input field
     }
-
-    // Add routing control for the path between origin and destination
-    // this.routingControl = L.control({
-    //   waypoints: [
-    //     L.latLng(originCoords[0], originCoords[1]),
-    //     L.latLng(destinationCoords[0], destinationCoords[1])
-    //   ],
-    //   routeWhileDragging: true
-    // }).addTo(this.map);
   }
 
-  // Mock geocoding function to return coordinates (In real-world, use an API like Google or OpenStreetMap)
-  geocodeAddress(address: string): [number, number] {
-    if (address.toLowerCase().includes('amsterdam')) {
-      return [52.370216, 4.895168]; // Coordinates for Amsterdam
-    } else if (address.toLowerCase().includes('rotterdam')) {
-      return [51.9225, 4.47917]; // Coordinates for Rotterdam
+  calculateAndDisplayRoute() {
+    if (this.originMarker && this.originMarker.getPosition() && this.destinationMarker && this.destinationMarker.getPosition()) {
+      this.directionsService.route({
+        origin: this.originMarker.getPosition() as google.maps.LatLng,
+        destination: this.destinationMarker.getPosition() as google.maps.LatLng,
+        travelMode: google.maps.TravelMode.DRIVING,
+      }, (response, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+          this.directionsRenderer.setDirections(response);
+
+          // Calculate distance and cost
+          const route = response!.routes[0];
+          const distanceInKm = route!.legs[0].distance!.value / 1000; // Convert meters to kilometers
+          const cost = this.calculateCost(distanceInKm); // Implement this method to calculate cost
+          this.routeDistance = `${distanceInKm.toFixed(2)} km`;
+          this.routeCost = `€${cost.toFixed(2)}`;
+        } else {
+          window.alert('Directions request failed due to ' + status);
+        }
+      });
+    } else {
+      window.alert('Please select both origin and destination on the map.');
     }
-    return [51.505, -0.09]; // Default to London (fallback)
   }
 
-  // Function to handle form submission
+  // Method to calculate cost based on distance
+  calculateCost(distanceInKm: number): number {
+    const costPerKm = 1; // Set your cost per kilometer here
+    return distanceInKm * costPerKm;
+  }
+
+  geocodeAddress(address: string, type: 'origin' | 'destination') {
+    this.geocoder.geocode({ address: address }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        const position = results![0].geometry.location;
+        this.map.setCenter(position); // Center the map to this location
+        this.setMarker(position, type);
+
+        // Calculate and display route if both addresses are available
+        if (this.originMarker && this.destinationMarker) {
+          this.calculateAndDisplayRoute();
+        }
+      } else {
+        window.alert('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  }
+
+  reverseGeocode(latLng: google.maps.LatLng, type: 'origin' | 'destination') {
+    this.geocoder.geocode({ location: latLng }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        if (results && results[0]) {
+          const address = results[0].formatted_address;
+          if (type === 'origin') {
+            this.newRequest.senderAddress = address;
+            this.newRequest.senderLat = latLng.lat();
+            this.newRequest.senderLng = latLng.lng();
+          } else if (type === 'destination') {
+            this.newRequest.recipientAddress = address;
+            this.newRequest.recipientLat = latLng.lat();
+            this.newRequest.recipientLng = latLng.lng();
+          }
+        }
+      } else {
+        window.alert('Reverse Geocoding failed due to ' + status);
+      }
+    });
+  }
+
+
   onSubmit() {
-    if (this.newRequest.name && this.newRequest.senderAddress && this.newRequest.recipientAddress) {
-      // Add new request to the array
-      this.requests.push({ ...this.newRequest });
-
-      // Geocode addresses
-      const senderCoords = this.geocodeAddress(this.newRequest.senderAddress);
-      const recipientCoords = this.geocodeAddress(this.newRequest.recipientAddress);
-
-      // Plot the route between sender and recipient
-      this.plotRoute(senderCoords, recipientCoords);
-
-      // Reset the form fields
-      this.newRequest = {
-        name: '',
-        senderAddress: '',
-        recipientAddress: '',
-        productType: '',
-        requestDate: '',
-        requestTime: ''
-      };
-    }
+    this.authService.request(this.newRequest).subscribe(
+      response => {
+        console.log('Request submitted successfully:', response);
+        alert('Your request has been submitted successfully!');
+        this.resetFormAndMap();
+      },
+      error => {
+        console.error('Error submitting request:', error);
+        alert('There was an error submitting your request. Please try again.');
+      }
+    );
   }
 
-  // Handle file selection for image upload
+
+
+  clearMap() {
+  if (this.originMarker) {
+      this.originMarker.setMap(null);
+      this.originMarker = undefined;
+  }
+  if (this.destinationMarker) {
+      this.destinationMarker.setMap(null);
+      this.destinationMarker = undefined;
+  }
+  this.map.setCenter({ lat: 41.9028, lng: 12.4964 }); // Reset to initial center
+  this.map.setZoom(12); // Reset to initial zoom
+}
+
+
+
+
+resetFormAndMap() {
+  // Reset form fields
+  this.newRequest = {
+    name: '',
+    senderAddress: '',
+    recipientAddress: '',
+    productType: '',
+    requestDate: '', // Adjust this if requestDate is supposed to be a Date
+    requestTime: '',
+    productSize: '',
+    recipientLat: 0,
+    recipientLng:0,
+    senderLat:0,
+    senderLng:0,
+    productImage: null
+  };
+
+  // Reset distance and cost fields
+  this.routeDistance = ''; // Ensure routeDistance is of the expected type
+  this.routeCost = ''; // Ensure routeCost is of the expected type
+
+  // Remove markers from the map
+  if (this.originMarker) {
+    this.originMarker.setMap(null); // Remove the origin marker from the map
+    this.originMarker = undefined; // Clear the reference
+  }
+
+  if (this.destinationMarker) {
+    this.destinationMarker.setMap(null); // Remove the destination marker from the map
+    this.destinationMarker = undefined; // Clear the reference
+  }
+
+  // Clear directions from the map
+  if (this.directionsRenderer) {
+    this.directionsRenderer.setMap(null); // Ensure directionsRenderer exists before calling
+  }
+}
+
+
+  // Called when the address is typed in manually for origin
+  onOriginAddressChange() {
+    this.originAddressSubject.next(this.newRequest.senderAddress);
+  }
+
+  // Called when the address is typed in manually for destination
+  onDestinationAddressChange() {
+    this.destinationAddressSubject.next(this.newRequest.recipientAddress);
+  }
+
   onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.newRequest.productImage = e.target.result; // Store base64 image string
-      };
-      reader.readAsDataURL(file);
+      this.newRequest.productImage = file; // Store the file directly
     }
   }
+
 }

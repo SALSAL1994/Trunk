@@ -1,6 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { RequestResponse } from 'src/interface';
+
+interface NewRequest {
+  name: string;
+  senderAddress: string;
+  recipientAddress: string;
+  productType: string;
+  requestDate: string;// Change to string if you will store as string
+  requestTime: string;
+  productSize: string;
+  productImage: File | null;
+}
+
+
+
+
 
 const AUTH_API = 'http://localhost:8080/';
 
@@ -33,6 +49,19 @@ export class AuthService {
         email,
         password,
         roles
+      },
+      httpOptions
+    );
+  }
+
+
+
+
+
+  request(newRequest:NewRequest): Observable<any> {
+    return this.http.post(
+      AUTH_API + 'api/auth/request',{
+        newRequest
       },
       httpOptions
     );
