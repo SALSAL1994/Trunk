@@ -223,7 +223,10 @@ throw new Error('Method not implemented.');
 
             const detourDistance = distanceDeliverer + distanceDestination; // Calculate detour distance
 
-            const basePrice = 10; // Base price
+            // Calculate the base price based on the requester's origin to destination
+            const baseDistance = response!.rows[0].elements[1].distance.value; // Distance from requester origin to destination
+            const basePrice = (baseDistance /1000) * 0.2; // Price per meter of base distance
+
             const detourPrice = detourDistance * 0.001; // Price per meter of detour
             const finalPrice = basePrice + detourPrice; // Final price calculation
 
@@ -235,6 +238,7 @@ throw new Error('Method not implemented.');
       );
     });
   }
+
 
 
   acceptRequest(request: Request): void {
@@ -250,6 +254,7 @@ throw new Error('Method not implemented.');
       delivererDestination: this.delivererRequest.destination,
       requesterOrigin: request.senderAddress,
       requesterDestination: request.recipientAddress,
+
       finalPrice: price
     };
 

@@ -171,7 +171,7 @@ export class RequestComponent implements OnInit {
 
   // Method to calculate cost based on distance
   calculateCost(distanceInKm: number): number {
-    const costPerKm = 0.5;
+    const costPerKm = 0.2;
     return distanceInKm * costPerKm;
   }
 
