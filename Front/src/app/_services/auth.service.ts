@@ -28,6 +28,9 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class AuthService {
+  // getNearbyRequests(origin: string, destination: string) {
+  //   throw new Error('Method not implemented.');
+  // }
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<any> {
@@ -87,4 +90,17 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('authToken');
   }
+
+  submitDelivererRequest(delivererData: any): Observable<any> {
+    return this.http.post(
+      AUTH_API + 'api/auth/save-deliverer',
+      { delivererData },
+      httpOptions
+    );
+  }
+
+
+
+
+
 }

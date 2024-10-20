@@ -11,6 +11,7 @@ import { BoardAdminComponent } from './board-admin/board-admin.component';
 import { AuthGuard } from './auth.guard'; // Import AuthGuard
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { RequestComponent } from './request/request.component';
+import { DeliveryComponent } from './delivery/delivery.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] }, // Protect route
@@ -21,7 +22,9 @@ const routes: Routes = [
   { path: 'mod', component: BoardModeratorComponent, canActivate: [AuthGuard] }, // Protect route
   { path: 'admin', component: BoardAdminComponent, canActivate: [AuthGuard] }, // Protect route
   { path: 'sidebar', component: SidebarComponent, canActivate: [AuthGuard] },
-  { path: 'request', component: RequestComponent, canActivate: [AuthGuard] }, // Protect route
+  { path: 'request', component: RequestComponent, canActivate: [AuthGuard] },
+
+  { path: 'deliveries', component: DeliveryComponent, canActivate: [AuthGuard] }, // Protect route
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

@@ -1,64 +1,128 @@
-<div class="request-container">
-  <h2>Create a New Request</h2>
+<div class="container">
 
-  <form (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="name">Name:</label>
-      <input type="text" id="name" [(ngModel)]="newRequest.name" name="name" required />
+  <div class="request-container">
+    <h2>Create a New Request</h2>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input
+          type="text"
+          id="name"
+          [(ngModel)]="newRequest.name"
+          name="name"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="senderAddress">Sender Address:</label>
+        <input
+          type="text"
+          id="senderAddress"
+          [(ngModel)]="newRequest.senderAddress"
+          name="senderAddress"
+          (blur)="onOriginAddressChange()"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="recipientAddress">Recipient Address:</label>
+        <input
+          type="text"
+          id="recipientAddress"
+          [(ngModel)]="newRequest.recipientAddress"
+          name="recipientAddress"
+          (blur)="onDestinationAddressChange()"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="productType">Product Type:</label>
+        <input
+          type="text"
+          id="productType"
+          [(ngModel)]="newRequest.productType"
+          name="productType"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="requestDate">Request Date:</label>
+        <input
+          type="date"
+          id="requestDate"
+          [(ngModel)]="newRequest.requestDate"
+          name="requestDate"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="requestTime">Request Time:</label>
+        <input
+          type="time"
+          id="requestTime"
+          [(ngModel)]="newRequest.requestTime"
+          name="requestTime"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="productSize">Estimated Product Weight: (max 5kg)</label>
+        <input
+          type="text"
+          id="productSize"
+          [(ngModel)]="newRequest.productSize"
+          name="productSize"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="productImage">Product Image:</label>
+        <input
+          type="file"
+          id="productImage"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <!-- Distance and Cost Display -->
+      <div class="form-group">
+        <label for="distance">Distance:</label>
+        <input
+          type="text"
+          id="distance"
+          [(ngModel)]="routeDistance"
+          name="distance"
+          readonly
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cost">Minimum Cost €:</label>
+        <input
+          type="text"
+          id="cost"
+          [(ngModel)]="routeCost"
+          name="cost"
+          readonly
+        />
+      </div>
+
+      <button type="submit" [disabled]="!newRequest.name">
+        Submit Request
+      </button>
+    </form>
+
+    <div class="map-container">
+      <h3>Select Origin and Destination on the Map</h3>
+      <div #map class="map" style="height: 400px"></div>
+      <!-- Add style for height -->
     </div>
-
-    <div class="form-group">
-      <label for="senderAddress">Sender Address:</label>
-      <input type="text" id="senderAddress" [(ngModel)]="newRequest.senderAddress" name="senderAddress" (blur)="onOriginAddressChange()" required />
-    </div>
-
-    <div class="form-group">
-      <label for="recipientAddress">Recipient Address:</label>
-      <input type="text" id="recipientAddress" [(ngModel)]="newRequest.recipientAddress" name="recipientAddress" (blur)="onDestinationAddressChange()" required />
-    </div>
-
-
-    <div class="form-group">
-      <label for="productType">Product Type:</label>
-      <input type="text" id="productType" [(ngModel)]="newRequest.productType" name="productType" required />
-    </div>
-
-    <div class="form-group">
-      <label for="requestDate">Request Date:</label>
-      <input type="date" id="requestDate" [(ngModel)]="newRequest.requestDate" name="requestDate" required />
-    </div>
-
-    <div class="form-group">
-      <label for="requestTime">Request Time:</label>
-      <input type="time" id="requestTime" [(ngModel)]="newRequest.requestTime" name="requestTime" required />
-    </div>
-
-    <div class="form-group">
-      <label for="productSize">Estimated Product Weight: (max 5kg)</label>
-      <input type="text" id="productSize" [(ngModel)]="newRequest.productSize" name="productSize" />
-    </div>
-
-    <div class="form-group">
-      <label for="productImage">Product Image:</label>
-      <input type="file" id="productImage" (change)="onFileSelected($event)" />
-    </div>
-
-    <!-- Distance and Cost Display -->
-    <div class="form-group">
-      <label for="distance">Distance:</label>
-      <input type="text" id="distance" [(ngModel)]="routeDistance" name="distance" readonly />
-    </div>
-
-    <div class="form-group">
-      <label for="cost">Minimum Cost €:</label>
-      <input type="text" id="cost" [(ngModel)]="routeCost" name="cost" readonly />
-    </div>
-
-    <button type="submit" [disabled]="!newRequest.name ">Submit Request</button>
-  </form>
-
-  <div class="map-container">
-    <h3>Select Origin and Destination on the Map</h3>
-    <div #map class="map" style="height: 400px;"></div> <!-- Add style for height -->
   </div>
 </div>

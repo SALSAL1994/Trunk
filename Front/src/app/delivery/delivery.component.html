@@ -1,0 +1,165 @@
+
+<div *ngIf="currentSlide === 1" class="slide-container">
+  <h3>Step 1: Enter Your Departure Details</h3>
+
+  <!-- Name -->
+  <div>
+    <label for="name">Name:</label>
+    <input
+      type="text"
+      [(ngModel)]="delivererRequest.name"
+      id="name"
+      placeholder="Enter your name"
+      required
+    />
+    <div *ngIf="!delivererRequest.name && (submitAttempted || delivererRequest.name)" class="error-message">
+      Name is required.
+    </div>
+  </div>
+
+  <!-- Departure Date -->
+  <div>
+    <label for="departureDate">Departure Date:</label>
+    <input
+      type="date"
+      [(ngModel)]="delivererRequest.departureDate"
+      id="departureDate"
+      required
+    />
+    <div *ngIf="!delivererRequest.departureDate && (submitAttempted || delivererRequest.departureDate)" class="error-message">
+      Departure date is required.
+    </div>
+  </div>
+
+  <!-- Departure Time -->
+  <div>
+    <label for="departureTime">Departure Time:</label>
+    <input
+      type="time"
+      [(ngModel)]="delivererRequest.departureTime"
+      id="departureTime"
+      required
+    />
+    <div *ngIf="!delivererRequest.departureTime && (submitAttempted || delivererRequest.departureTime)" class="error-message">
+      Departure time is required.
+    </div>
+  </div>
+
+  <!-- Origin -->
+  <div>
+    <label for="origin">Origin:</label>
+    <input
+      type="text"
+      #originInput
+      id="origin"
+      placeholder="Enter origin"
+      required
+    />
+    <div *ngIf="!delivererRequest.origin && (submitAttempted || delivererRequest.origin)" class="error-message">
+      Origin is required.
+    </div>
+  </div>
+
+  <!-- Destination -->
+  <div>
+    <label for="destination">Destination:</label>
+    <input
+      type="text"
+      #destinationInput
+      id="destination"
+      placeholder="Enter destination"
+      required
+    />
+    <div *ngIf="!delivererRequest.destination && (submitAttempted || delivererRequest.destination)" class="error-message">
+      Destination is required.
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div #mapElement class="map-container" style="height: 400px; width: 100%;"></div> <!-- Map container -->
+
+  <div class="button-container">
+    <button (click)="prevSlide()" [disabled]="currentSlide === 1">Previous</button>
+    <button (click)="nextSlide()">Next</button> <!-- Removed validation for this step -->
+  </div>
+</div>
+
+<!-- Step 2: View and Accept Requests -->
+<div *ngIf="currentSlide === 2" class="slide-container">
+  <h3>Step 2: Nearby Requests</h3>
+
+  <div *ngIf="nearbyRequests.length > 0; else noRequests">
+    <h4>Available Requests</h4>
+    <table class="requests-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Sender Address</th>
+          <th>Recipient Address</th>
+          <th>Departure Date</th>
+          <th>Departure Time</th>
+          <th>Product Type</th>
+          <th>Product Size</th>
+          <th>Created At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of nearbyRequests">
+          <td>{{ request.name }}</td>
+          <td>{{ request.senderAddress }}</td>
+          <td>{{ request.recipientAddress }}</td>
+          <td>{{ request.requestDate | date }}</td>
+          <td>{{ request.requestTime }}</td>
+          <td>{{ request.productType }}</td>
+          <td>{{ request.productSize }}</td>
+          <td>{{ request.createdAt | date }}</td>
+          <td>
+            <button class="accept-btn" (click)="acceptRequest(request)">choose Request</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noRequests>
+    <p>No nearby requests available.</p>
+  </ng-template>
+
+  <div class="button-container">
+    <button class="prev-btn" (click)="prevSlide()">Previous</button>
+    <button class="finish-btn" (click)="finishDelivery()">Finish</button>
+  </div>
+</div>
+<div *ngIf="currentSlide === 3" class="slide-container">
+  <h3>Confirm Delivery Details</h3>
+
+  <table class="requests-table">
+    <tr>
+      <th>Deliverer Origin</th>
+      <td>{{ finalDetails.delivererOrigin }}</td>
+    </tr>
+    <tr>
+      <th>Deliverer Destination</th>
+      <td>{{ finalDetails.delivererDestination }}</td>
+    </tr>
+    <tr>
+      <th>Requester Origin</th>
+      <td>{{ finalDetails.requesterOrigin }}</td>
+    </tr>
+    <tr>
+      <th>Requester Destination</th>
+      <td>{{ finalDetails.requesterDestination }}</td>
+    </tr>
+    <tr>
+      <th>Price</th>
+      <td>{{ finalDetails.finalPrice | currency }}</td>
+    </tr>
+  </table>
+
+  <button class="accept-button" (click)="finishDelivery()">Accept & Finalize</button>
+</div>
+
+
+
+

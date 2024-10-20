@@ -18,6 +18,7 @@ import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { FooterComponent } from './footer/footer.component';
 import { RequestComponent } from './request/request.component';
+import { DeliveryComponent } from './delivery/delivery.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { RequestComponent } from './request/request.component';
     HeaderComponent,
     SidebarComponent,
     FooterComponent,
-    RequestComponent
+    RequestComponent,
+    DeliveryComponent
   ],
   imports: [
     BrowserModule,

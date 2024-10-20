@@ -5,9 +5,11 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../_services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { StorageService } from '../_services/storage.service';
 
 
 interface NewRequest {
+  userEmail:string;
   name: string;
   senderAddress: string;
   senderLat: number;
@@ -20,6 +22,7 @@ interface NewRequest {
   requestTime: string;
   productSize: string;
   productImage: File | null;
+  accepted: boolean;
 }
 
 @Component({
@@ -39,6 +42,7 @@ export class RequestComponent implements OnInit {
   geocoder!: google.maps.Geocoder;
 
   newRequest: NewRequest = {
+    userEmail:'',
     name: '',
     senderAddress: '',
     recipientAddress: '',
@@ -50,17 +54,18 @@ export class RequestComponent implements OnInit {
     senderLng:0,
     recipientLat: 0,
     recipientLng: 0,
-    productImage: null
+    productImage: null,
+    accepted:false
   };
 
 
-  routeDistance: string = ''; // Distance in kilometers
-  routeCost: string = '';     // Cost in euros
+  routeDistance: string = '';
+  routeCost: string = '';
 
   private originAddressSubject = new Subject<string>();
   private destinationAddressSubject = new Subject<string>();
 
-  constructor(private authService: AuthService, private formModule:FormsModule) { }
+  constructor(private authService: AuthService, private formModule:FormsModule, private storageService: StorageService) { }
 
   ngOnInit() {
     const loader = new Loader({
@@ -80,12 +85,12 @@ export class RequestComponent implements OnInit {
       console.error("Error loading Google Maps API", err);
     });
 
- 
-    this.originAddressSubject.pipe(debounceTime(300)).subscribe(address => {
+
+    this.originAddressSubject.pipe().subscribe(address => {
       this.geocodeAddress(address, 'origin');
     });
 
-    this.destinationAddressSubject.pipe(debounceTime(300)).subscribe(address => {
+    this.destinationAddressSubject.pipe().subscribe(address => {
       this.geocodeAddress(address, 'destination');
     });
   }
@@ -150,10 +155,9 @@ export class RequestComponent implements OnInit {
         if (status === google.maps.DirectionsStatus.OK) {
           this.directionsRenderer.setDirections(response);
 
-          // Calculate distance and cost
           const route = response!.routes[0];
-          const distanceInKm = route!.legs[0].distance!.value / 1000; // Convert meters to kilometers
-          const cost = this.calculateCost(distanceInKm); // Implement this method to calculate cost
+          const distanceInKm = route!.legs[0].distance!.value / 1000;
+          const cost = this.calculateCost(distanceInKm);
           this.routeDistance = `${distanceInKm.toFixed(2)} km`;
           this.routeCost = `€${cost.toFixed(2)}`;
         } else {
@@ -167,7 +171,7 @@ export class RequestComponent implements OnInit {
 
   // Method to calculate cost based on distance
   calculateCost(distanceInKm: number): number {
-    const costPerKm = 1; // Set your cost per kilometer here
+    const costPerKm = 0.5;
     return distanceInKm * costPerKm;
   }
 
@@ -175,10 +179,10 @@ export class RequestComponent implements OnInit {
     this.geocoder.geocode({ address: address }, (results, status) => {
       if (status === google.maps.GeocoderStatus.OK) {
         const position = results![0].geometry.location;
-        this.map.setCenter(position); // Center the map to this location
+        this.map.setCenter(position);
         this.setMarker(position, type);
 
-        // Calculate and display route if both addresses are available
+
         if (this.originMarker && this.destinationMarker) {
           this.calculateAndDisplayRoute();
         }
@@ -210,7 +214,12 @@ export class RequestComponent implements OnInit {
   }
 
 
+
   onSubmit() {
+    const userInfo = this.storageService.getUser();
+    this.newRequest.userEmail= userInfo.email;
+    this.newRequest.accepted = false;
+
     this.authService.request(this.newRequest).subscribe(
       response => {
         console.log('Request submitted successfully:', response);
@@ -245,6 +254,7 @@ export class RequestComponent implements OnInit {
 resetFormAndMap() {
 
   this.newRequest = {
+    userEmail:'',
     name: '',
     senderAddress: '',
     recipientAddress: '',
@@ -256,7 +266,8 @@ resetFormAndMap() {
     recipientLng:0,
     senderLat:0,
     senderLng:0,
-    productImage: null
+    productImage: null,
+    accepted:false
   };
 
 
