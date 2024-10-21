@@ -16,6 +16,7 @@ const RequestSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now } ,    
   userEmail:{ type: String, required: true },
   accepted:{ type: Boolean, required: true },
+  acceptedBy:{ type: String, required: false },
 });
 
 const RequestModel = mongoose.model('Request', RequestSchema);

@@ -84,7 +84,7 @@ app.post("/register", async (req, res) => {
 
 
 app.post("/signout", (req, res) => {
-  req.session = null; // Clear the session
+  req.session = null;
   res.status(200).json({ message: "You've been signed out!" });
 });
 // Set port, listen for requests

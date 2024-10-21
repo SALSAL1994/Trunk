@@ -1,49 +1,46 @@
-const express = require('express');
-const bcrypt = require('bcryptjs'); // For password hashing
-const User = require('../models/users.model'); 
+const express = require("express");
+const bcrypt = require("bcryptjs"); // For password hashing
+const User = require("../models/users.model");
 const router = express.Router();
-const multer = require('multer');
-const Deliverer = require('../models/deliverer.model'); // Import the Deliverer model
-const RequestModel = require('../models/request.model'); // Request model
-const mongoose = require('mongoose');
+const multer = require("multer");
+const Deliverer = require("../models/deliverer.model"); // Import the Deliverer model
+const RequestModel = require("../models/request.model"); // Request model
+const mongoose = require("mongoose");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); 
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname); // Create a unique file name
-  }
+    cb(null, Date.now() + "-" + file.originalname); // Create a unique file name
+  },
 });
 
-const upload = multer({ storage: storage }); 
+const upload = multer({ storage: storage });
 
 // ====================== Registration Route ======================
-router.post('/signup', async (req, res) => {
+router.post("/signup", async (req, res) => {
   const { username, email, password, roles } = req.body;
 
   try {
-    // Check if user already exists by email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password before saving the user
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      roles // Save the roles array (e.g. ['deliverer', 'requester'])
+      roles, // Save the roles array (e.g. ['deliverer', 'requester'])
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error registering user' });
+    res.status(500).json({ message: "Error registering user" });
   }
 });
 
@@ -82,9 +79,8 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-router.post("/request", upload.single('productImage'), async (req, res) => {
+router.post("/request", upload.single("productImage"), async (req, res) => {
   try {
-   
     const {
       name,
       senderAddress,
@@ -98,11 +94,11 @@ router.post("/request", upload.single('productImage'), async (req, res) => {
       requestTime,
       productSize,
       userEmail,
-      accepted
+      accepted,
+      acceptedBy,
     } = req.body.newRequest;
     const productImage = req.file; // Access the uploaded file if available
 
-   
     const newRequest = new RequestModel({
       name,
       senderAddress,
@@ -117,28 +113,111 @@ router.post("/request", upload.single('productImage'), async (req, res) => {
       productSize,
       productImage: productImage ? productImage.filename : null,
       userEmail,
-      accepted
+      accepted,
+      acceptedBy,
     });
-
-    // Save the request to the database
     const savedRequest = await newRequest.save();
 
-    // Send success response with the saved data
     res.status(201).json({
-      message: 'Request submitted successfully!',
-      data: savedRequest
+      message: "Request submitted successfully!",
+      data: savedRequest,
     });
   } catch (error) {
-    console.error('Error processing request:', error);
+    console.error("Error processing request:", error);
     res.status(500).json({
-      message: 'An error occurred while processing your request.',
-      error: error.message
+      message: "An error occurred while processing your request.",
+      error: error.message,
     });
   }
 });
 
+router.post("/accept-request", async (req, res) => {
+  const { requestId, delivererEmail } = req.body;
+  try {
+    const request = await RequestModel.findById(requestId);
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+    if (request.accepted) {
+      return res
+        .status(400)
+        .json({ message: "Request has already been accepted" });
+    }
+    request.accepted = true;
+    request.acceptedBy = delivererEmail.email;
+    const updatedRequest = await request.save();
 
-async function findNearbyRequests(originLat, originLng, destinationLat, destinationLng, departureDate) {
+    res.status(200).json({
+      message: "Request accepted successfully",
+      data: updatedRequest,
+    });
+  } catch (error) {
+    console.error("Error accepting request:", error);
+    res.status(500).json({
+      message: "An error occurred while accepting the request.",
+      error: error.message,
+    });
+  }
+});
+
+router.get("/requests/accepted/:email", async (req, res) => {
+  const userEmail = req.params.email;
+  try {
+    const requests = await RequestModel.find({
+      userEmail: userEmail,
+      acceptedBy: { $exists: true },
+    });
+
+    if (!requests.length) {
+      return res
+        .status(404)
+        .json({ message: "No accepted requests found for this email." });
+    }
+
+    const delivererIds = [
+      ...new Set(requests.map((request) => request.acceptedBy)),
+    ];
+
+    const deliverers = await Deliverer.find({
+      delivererEmail: { $in: delivererIds },
+    });
+
+    const requestsWithDeliverers = requests.map((request) => {
+      const deliverer = deliverers.find(
+        (d) => d.delivererEmail === request.acceptedBy
+      );
+      return {
+        request,
+        deliverer,
+      };
+    });
+
+    res.json(requestsWithDeliverers);
+  } catch (error) {
+    console.error("Error fetching accepted requests:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching requests." });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+async function findNearbyRequests(
+  originLat,
+  originLng,
+  destinationLat,
+  destinationLng,
+  departureDate
+) {
   const query = {
     requestDate: departureDate,
     $or: [
@@ -148,15 +227,15 @@ async function findNearbyRequests(originLat, originLng, destinationLat, destinat
             senderLat: {
               $gte: originLat - 0.09,
               $lte: originLat + 0.09,
-            }
+            },
           },
           {
             senderLng: {
               $gte: originLng - 0.09,
               $lte: originLng + 0.09,
-            }
-          }
-        ]
+            },
+          },
+        ],
       },
       {
         $and: [
@@ -164,30 +243,38 @@ async function findNearbyRequests(originLat, originLng, destinationLat, destinat
             recipientLat: {
               $gte: destinationLat - 0.09,
               $lte: destinationLat + 0.09,
-            }
+            },
           },
           {
             recipientLng: {
               $gte: destinationLng - 0.09,
               $lte: destinationLng + 0.09,
-            }
-          }
-        ]
-      }
-    ]
+            },
+          },
+        ],
+      },
+    ],
   };
 
-  console.log("Query: ", JSON.stringify(query, null, 2)); 
+  console.log("Query: ", JSON.stringify(query, null, 2));
 
- 
-  return await RequestModel.find(query); 
-
+  return await RequestModel.find(query);
 }
 
-
-router.post('/save-deliverer', async (req, res) => {
+router.post("/save-deliverer", async (req, res) => {
   try {
-    const { name, departureDate, departureTime, origin, destination, originLat, originLng, destinationLat, destinationLng } = req.body.delivererData;
+    const {
+      name,
+      departureDate,
+      departureTime,
+      origin,
+      destination,
+      originLat,
+      originLng,
+      destinationLat,
+      destinationLng,
+      delivererEmail,
+    } = req.body.delivererData;
 
     const newDeliverer = new Deliverer({
       name,
@@ -198,26 +285,28 @@ router.post('/save-deliverer', async (req, res) => {
       originLat,
       originLng,
       destinationLat,
-      destinationLng
+      destinationLng,
+      delivererEmail,
     });
 
-    // await newDeliverer.save();
+    await newDeliverer.save();
 
-  
-    const nearbyRequests = await findNearbyRequests(originLat, originLng, destinationLat, destinationLng, departureDate);
+    const nearbyRequests = await findNearbyRequests(
+      originLat,
+      originLng,
+      destinationLat,
+      destinationLng,
+      departureDate
+    );
 
-    
     res.status(200).json({
-      message: 'Deliverer saved successfully!',
-      nearbyRequests
+      message: "Deliverer saved successfully!",
+      nearbyRequests,
     });
   } catch (error) {
-    console.error('Error saving deliverer:', error);
-    res.status(500).json({ message: 'Error saving deliverer.' });
+    console.error("Error saving deliverer:", error);
+    res.status(500).json({ message: "Error saving deliverer." });
   }
 });
-
-
-
 
 module.exports = router;

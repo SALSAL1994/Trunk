@@ -1,15 +1,16 @@
+
 .slide-container {
-  max-width: 1200px;
-  margin: 50px auto 30px auto;;
+  max-width: 1100px;
+  margin: 50px auto 30px auto;
   text-align: center;
   padding: 30px;
-  background-color: #9f9f9f; /* Slightly softer gray */
+  background-color: #000000; /* Slightly softer gray */
   border-radius: 12px; /* Smooth border radius */
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.15); /* Increased shadow for depth */
   margin-bottom: 30px; /* More space between slides */
 }
 
-h3 {
+h3,h4 {
   margin-bottom: 25px;
   font-size: 2.8em;
   color: #ffffff;
@@ -25,7 +26,9 @@ label {
   font-size: 1.1em;
 }
 
-input[type="text"], input[type="date"], input[type="time"] {
+input[type="text"],
+input[type="date"],
+input[type="time"] {
   width: 100%;
   padding: 12px;
   margin-bottom: 25px; /* Slightly more margin for spacing */
@@ -37,26 +40,21 @@ input[type="text"], input[type="date"], input[type="time"] {
   color: #333; /* Darker text for readability */
 }
 
-
+/* Adjusted table styling */
 table.requests-table {
-  width: 20%; /* Reduced width to center it within the container */
+  width: 80%; /* Increased width for better visibility */
+  max-width: 800px; /* Set a max-width for larger screens */
   margin: 0 auto; /* Center the table horizontally */
   border-collapse: collapse;
   margin-top: 20px;
   font-size: 1.2em;
-  table-layout:inherit; /* Adjusts columns to fit content */
+  background-color: white;
 }
 
 /* Table header and cells */
-.requests-table th, .requests-table td {
-  padding: 12px 10px; /* Reduced padding to fit better */
-  text-align: left;
-  border: 1px solid #ddd;
-  word-wrap: break-word; /* Ensures long text wraps to fit the cell */
-}
-
-.requests-table th, .requests-table td {
-  padding: 12px 10px; /* Reduced padding to fit better */
+.requests-table th,
+.requests-table td {
+  padding: 12px 10px; /* Consistent padding */
   text-align: left;
   border: 1px solid #ddd;
   word-wrap: break-word; /* Ensures long text wraps to fit the cell */
@@ -69,25 +67,64 @@ table.requests-table {
 }
 
 .requests-table tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: #f2f2f2; /* Zebra striping for readability */
 }
 
-/* .requests-table tr:hover {
-  background-color: #ddd;
-} */
-
-.button.accept-button {
-  background-color: #007bff;
+/* Hover effect for table rows */
+.requests-table tr:hover {
+  background-color: #ddd; /* Subtle hover effect */
 }
 
-.button.accept-button:hover {
-  background-color: #0069d9;
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white; /* White text for buttons */
+  transition: background-color 0.3s ease;
+  margin-right: 10px; /* Add space between buttons */
 }
 
+
+.accept-btn{
+  background-color: #28a745
+}
+
+/* Green button for Next */
+button.next-btn {
+  background-color: #28a745; /* Green */
+}
+
+button.next-btn:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+/* Red button for Previous */
+button.prev-btn {
+  background-color: #dc3545; /* Red */
+}
+
+button.prev-btn:hover {
+  background-color: #c82333; /* Darker red on hover */
+}
+
+/* Fix margin between buttons */
+.button-container button {
+  margin-right: 15px; /* Adjust margin between buttons */
+}
 /* Ensure responsive behavior on smaller screens */
 @media (max-width: 600px) {
-  .requests-table th, .requests-table td {
-    font-size: 0.9em;
+  .requests-table th,
+  .requests-table td {
+    font-size: 0.9em; /* Smaller font size */
     padding: 8px; /* Smaller padding for better fit */
+  }
+
+  h3 {
+    font-size: 2em; /* Adjust header size for small screens */
+  }
+
+  .slide-container {
+    padding: 20px; /* Reduce padding on small screens */
   }
 }

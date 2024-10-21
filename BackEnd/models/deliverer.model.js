@@ -6,10 +6,11 @@ const DelivererSchema = new mongoose.Schema({
   departureTime: String,
   origin: String,
   destination: String,
-  originLat: Number, // Storing coordinates
+  originLat: Number, 
   originLng: Number,
   destinationLat: Number,
   destinationLng: Number,
+  delivererEmail: String,
 });
 
 const Deliverer = mongoose.model('Deliverer', DelivererSchema);

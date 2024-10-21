@@ -28,9 +28,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class AuthService {
-  // getNearbyRequests(origin: string, destination: string) {
-  //   throw new Error('Method not implemented.');
-  // }
+
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<any> {
@@ -57,10 +55,6 @@ export class AuthService {
     );
   }
 
-
-
-
-
   request(newRequest:NewRequest): Observable<any> {
     return this.http.post(
       AUTH_API + 'api/auth/request',{
@@ -69,6 +63,25 @@ export class AuthService {
       httpOptions
     );
   }
+
+  acceptRequest(requestId: string, delivererEmail: string): Observable<any> {
+    return this.http.post(
+      AUTH_API + 'api/auth/accept-request',
+      {
+        requestId,
+        delivererEmail
+      },
+      httpOptions
+    );
+  }
+
+
+  getAcceptedRequests(userEmail: string): Observable<any> {
+    return this.http.get<any>(`${AUTH_API}api/auth/requests/accepted/${userEmail}`, httpOptions);
+  }
+
+
+
 
   logout(): Observable<any> {
 

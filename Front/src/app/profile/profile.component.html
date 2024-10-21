@@ -1,21 +1,56 @@
-<div class="container" *ngIf="currentUser; else loggedOut">
-  <header class="jumbotron">
+<div class="container profile-container" *ngIf="currentUser; else loggedOut">
+  <header class="jumbotron profile-header">
     <h3>
       <strong>{{ currentUser.username }}</strong> Profile
     </h3>
   </header>
+
   <p>
-    <strong>Email:</strong>
-    {{ currentUser.email }}
+    <strong>Email:</strong> {{ currentUser.email }}
   </p>
+
   <strong>Roles:</strong>
-  <ul>
+  <ul class="roles-list">
     <li *ngFor="let role of currentUser.roles">
       {{ role }}
     </li>
   </ul>
+
+  <h4 class="section-title">Accepted Delivery Requests:</h4>
+
+  <div class="table-responsive" *ngIf="acceptedRequests.length > 0; else noRequests">
+    <table class="table table-bordered table-striped delivery-table">
+      <thead>
+        <tr>
+          <th>Product Type</th>
+          <th>Contact</th>
+          <th>Accepted By</th>
+          <th>Price</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of acceptedRequests">
+          <td>{{ request.request?.productType }}</td>
+          <td>{{ request.request?.acceptedBy }}</td>
+          <td>{{ request.deliverer?.name }}</td>
+          <td>4.81 €</td>
+          <!-- later i need to fix this -->
+          <td>
+            <button class="btn btn-primary accept-btn" (click)="acceptRequest(request)">
+              Accept
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noRequests>
+    <p class="no-requests">No accepted delivery requests found.</p>
+  </ng-template>
 </div>
 
 <ng-template #loggedOut>
-  Please login.
+  <p>Please login.</p>
 </ng-template>

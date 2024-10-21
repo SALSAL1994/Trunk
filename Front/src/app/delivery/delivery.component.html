@@ -79,12 +79,11 @@
   <div #mapElement class="map-container" style="height: 400px; width: 100%;"></div> <!-- Map container -->
 
   <div class="button-container">
-    <button (click)="prevSlide()" [disabled]="currentSlide === 1">Previous</button>
-    <button (click)="nextSlide()">Next</button> <!-- Removed validation for this step -->
+    <button class="prev-btn" (click)="prevSlide()" [disabled]="currentSlide === 1">Previous</button>
+    <button class="next-btn" (click)="nextSlide()">Next</button> <!-- Added next-btn class -->
   </div>
-</div>
 
-<!-- Step 2: View and Accept Requests -->
+</div>
 <div *ngIf="currentSlide === 2" class="slide-container">
   <h3>Step 2: Nearby Requests</h3>
 
@@ -128,21 +127,27 @@
 
   <div class="button-container">
     <button class="prev-btn" (click)="prevSlide()">Previous</button>
-    <button class="finish-btn" (click)="finishDelivery()">Finish</button>
+    <!-- <button class="finish-btn" (click)="finishDelivery()">Finish</button> -->
   </div>
 </div>
 <div *ngIf="currentSlide === 3" class="slide-container">
   <h3>Confirm Delivery Details</h3>
 
+  <!-- Table to display delivery details -->
   <table class="requests-table">
+
     <tr>
+      <th>Requester Name</th>
+      <td>{{ finalDetails.requesterName }}</td>
+    </tr>
+    <!-- <tr>
       <th>Deliverer Origin</th>
       <td>{{ finalDetails.delivererOrigin }}</td>
     </tr>
     <tr>
       <th>Deliverer Destination</th>
       <td>{{ finalDetails.delivererDestination }}</td>
-    </tr>
+    </tr> -->
     <tr>
       <th>Requester Origin</th>
       <td>{{ finalDetails.requesterOrigin }}</td>
@@ -152,14 +157,16 @@
       <td>{{ finalDetails.requesterDestination }}</td>
     </tr>
     <tr>
-      <th>Price</th>
-      <td>{{ finalDetails.finalPrice | currency }}</td>
+      <th>Final Price € (Detour included) </th>
+      <td>{{ finalDetails.finalPrice }}</td>
     </tr>
   </table>
 
-  <button class="accept-button" (click)="finishDelivery()">Accept & Finalize</button>
+  <!-- Map to display routes -->
+  <div #mapElement class="map-container" style="height: 400px; width: 100%;"></div>
+  <button class="prev-btn" (click)="prevSlide()">Previous</button>
+  <button class="accept-btn" (click)="finishDelivery(selectedRequest)">Accept & Finalize</button>
 </div>
-
 
 
 

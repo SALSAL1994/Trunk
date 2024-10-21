@@ -23,6 +23,7 @@ interface NewRequest {
   productSize: string;
   productImage: File | null;
   accepted: boolean;
+  acceptedBy: string;
 }
 
 @Component({
@@ -55,7 +56,8 @@ export class RequestComponent implements OnInit {
     recipientLat: 0,
     recipientLng: 0,
     productImage: null,
-    accepted:false
+    accepted:false,
+    acceptedBy: '',
   };
 
 
@@ -171,7 +173,7 @@ export class RequestComponent implements OnInit {
 
   // Method to calculate cost based on distance
   calculateCost(distanceInKm: number): number {
-    const costPerKm = 0.2;
+    const costPerKm = 0.01;
     return distanceInKm * costPerKm;
   }
 
@@ -267,7 +269,8 @@ resetFormAndMap() {
     senderLat:0,
     senderLng:0,
     productImage: null,
-    accepted:false
+    accepted:false,
+    acceptedBy:''
   };
 
 

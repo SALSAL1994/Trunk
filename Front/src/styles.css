@@ -1,6 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
+
+body {
+  background-image: url('assets/crowdshipping-antsroute-4.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  height: 100vh;
+}
 
 
-.body{
-  color: black;
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+}
+
+p, input, button {
+  font-family: 'Roboto', sans-serif;
 }
