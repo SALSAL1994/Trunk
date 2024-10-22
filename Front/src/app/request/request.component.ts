@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Loader } from '@googlemaps/js-api-loader';
-import { config } from '../../../../Front/config';
+import { config } from '../../../config/config';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../_services/auth.service';
@@ -173,7 +173,7 @@ export class RequestComponent implements OnInit {
 
   // Method to calculate cost based on distance
   calculateCost(distanceInKm: number): number {
-    const costPerKm = 0.01;
+    const costPerKm = 0.1;
     return distanceInKm * costPerKm;
   }
 

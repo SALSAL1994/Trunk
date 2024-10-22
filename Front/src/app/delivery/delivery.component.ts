@@ -1,6 +1,6 @@
   import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
   import { Loader } from '@googlemaps/js-api-loader';
-  import { config } from '../../../../Front/config';
+  import { config } from '../../../../Front/config/config';
   import { AuthService } from '../_services/auth.service';
   import { StorageService } from '../_services/storage.service';
   import Swal from 'sweetalert2';
@@ -254,7 +254,7 @@
 
               // Calculate the base price based on the requester's origin to destination
               const baseDistance = response!.rows[0].elements[1].distance.value; // Distance from requester origin to destination
-              const basePrice = (baseDistance / 1000) * 0.2 ;
+              const basePrice = (baseDistance / 1000) * 0.3 ;
 
               const detourPrice = detourDistance * 0.001; // Price per meter of detour
               const finalPrice = basePrice + detourPrice; // Final price calculation

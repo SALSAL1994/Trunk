@@ -225,14 +225,14 @@ async function findNearbyRequests(
         $and: [
           {
             senderLat: {
-              $gte: originLat - 0.09,
-              $lte: originLat + 0.09,
+              $gte: originLat - 0.06,
+              $lte: originLat + 0.06,
             },
           },
           {
             senderLng: {
-              $gte: originLng - 0.09,
-              $lte: originLng + 0.09,
+              $gte: originLng - 0.06,
+              $lte: originLng + 0.06,
             },
           },
         ],
@@ -241,14 +241,14 @@ async function findNearbyRequests(
         $and: [
           {
             recipientLat: {
-              $gte: destinationLat - 0.09,
-              $lte: destinationLat + 0.09,
+              $gte: destinationLat - 0.06,
+              $lte: destinationLat + 0.06,
             },
           },
           {
             recipientLng: {
-              $gte: destinationLng - 0.09,
-              $lte: destinationLng + 0.09,
+              $gte: destinationLng - 0.06,
+              $lte: destinationLng + 0.06,
             },
           },
         ],

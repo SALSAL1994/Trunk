@@ -1,10 +1,11 @@
 /* sidebar.component.css */
 .sidebar {
-    width: 250px; /* Adjust the width as needed */
+    width: 250px; 
     background-color: black; /* Sidebar background color */
     color: white; /* Text color */
     min-height: 100vh; /* Stretch to full height */
     padding: 20px; /* Padding for the content */
+    font-size: 30px;
   }
   
   .sidebar h2 {
